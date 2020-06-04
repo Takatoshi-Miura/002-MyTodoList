@@ -75,8 +75,8 @@ class ViewController: UIViewController,UITableViewDataSource,UITableViewDelegate
                 self.tableView.insertRows(at: [IndexPath(row:0,section:0)],with: UITableView.RowAnimation.right)
                 //Todoの内容と達成度をデータベースに保存
                 let databaseReference:DatabaseReference! = Database.database().reference()
-                let titleData = ["\(myTodo.getTodoID())/myTodo":myTodo.todoTitle]
-                let doneData  = ["\(myTodo.getTodoID())/todoDone":myTodo.todoDone]
+                let titleData = ["\(myTodo.todoID)/myTodo":myTodo.todoTitle]
+                let doneData  = ["\(myTodo.todoID)/todoDone":myTodo.todoDone]
                 databaseReference.child("user").updateChildValues(titleData as [AnyHashable : Any])
                 databaseReference.child("user").updateChildValues(doneData)
             }
@@ -131,7 +131,7 @@ class ViewController: UIViewController,UITableViewDataSource,UITableViewDelegate
         tableView.reloadRows(at:[indexPath],with:UITableView.RowAnimation.fade)
         //Todoの達成度をデータベースに保存
         let databaseReference:DatabaseReference! = Database.database().reference()
-        let doneData = ["\(myTodo.getTodoID())/todoDone":myTodo.todoDone]
+        let doneData = ["\(myTodo.todoID)/todoDone":myTodo.todoDone]
         databaseReference.child("user").updateChildValues(doneData)
     }
     
@@ -142,7 +142,7 @@ class ViewController: UIViewController,UITableViewDataSource,UITableViewDelegate
         if editingStyle == UITableViewCell.EditingStyle.delete {
             //データベースのデータを削除
             let databaseReference:DatabaseReference! = Database.database().reference()
-            databaseReference.child("user/\(todoList[indexPath.row].getTodoID())").removeValue()
+            databaseReference.child("user/\(todoList[indexPath.row].todoID)").removeValue()
             //ToDoリストから削除
             todoList.remove(at:indexPath.row)
             //セルを削除
@@ -153,7 +153,7 @@ class ViewController: UIViewController,UITableViewDataSource,UITableViewDelegate
 }
 
 
-//固有IDを設定することによってTodoを区別する
+//Todoを作成する毎にMyTodoクラスのオブジェクトが生成される
 class MyTodo {
     
     static var supportsSecureCoding:Bool{
@@ -161,7 +161,7 @@ class MyTodo {
     }
 
     static var todoCount:Int = 0 //登録したTodoの総合計
-    private let todoID:Int       //Todoの固有ID。一度設定したらTodoが削除されるまで不変なため定数で宣言。
+    let todoID:Int               //Todoの固有ID。一度設定したらTodoが削除されるまで不変なため定数で宣言。
     var todoTitle:String?        //ToDoのタイトル
     var todoDone:Bool = false    //ToDoを完了したかどうかを表すフラグ
     
@@ -178,11 +178,6 @@ class MyTodo {
         if todoID > MyTodo.todoCount {
             MyTodo.todoCount = todoID
         }
-    }
-    
-    //固有IDのゲッター
-    public func getTodoID() -> Int {
-        return self.todoID
     }
 
 }
